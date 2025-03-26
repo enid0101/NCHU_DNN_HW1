@@ -6,25 +6,40 @@
     <title>Gridworld Environment and Value Iteration</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif; /* 使用科技感字體 */
+            background: linear-gradient(135deg, #668fdc, #2a5298); /* 深藍色漸變背景 */
+            color: #ffffff; /* 白色文字 */
             text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 標題陰影 */
+            font-size: 2.5em;
+            margin-bottom: 20px;
         }
         .container {
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
+            gap: 20px; /* 增加網格間距 */
         }
         .grid-container {
-            border: 1px solid #ccc;
+            border: 2px solid #ffffff; /* 白色邊框 */
+            border-radius: 10px; /* 圓角邊框 */
+            background: rgba(255, 255, 255, 0.1); /* 半透明背景 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* 科技感陰影 */
         }
         .grid-container h3 {
             margin: 0;
             padding: 10px;
             color: white;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
         }
         .grid {
             display: grid;
-            border: 1px solid #000;
+            border: 1px solid #ffffff;
         }
         .cell {
             width: 50px;
@@ -34,31 +49,97 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            background: rgba(255, 255, 255, 0.2); /* 半透明格子背景 */
+            transition: background 0.3s; /* 滑鼠懸停效果 */
         }
-        .start { background-color: green; }
-        .end { background-color: red; }
-        .obstacle { background-color: gray; }
-        .path { background-color: yellow; }
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.4); /* 懸停時變亮 */
+        }
+        .start { background-color: #37fd00; }
+        .end { background-color: #f80000; }
+        .obstacle { background-color: #848383; }
+        .path { background-color: #eeff58; }
         .buttons {
             margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* 按鈕間距 */
         }
         .buttons button {
-            padding: 10px 20px;
-            margin: 0 5px;
+            width: 80px; /* 固定寬度 */
+            height: 60px; /* 固定高度 */
+            border-radius: 10px; /* 將 50% 改成 10px，即圓角長方形 */
+            border: 2px solid #ffffff; /* 白色邊框 */
+            background: linear-gradient(145deg, #5780c6, #1e3c72); /* 按鈕漸變背景 */
+            color: white;
+            font-weight: bold;
             cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s; /* 動畫效果 */
+            box-shadow: 0 2px 10px rgba(5, 237, 47, 0.3); /* 按鈕陰影 */
         }
-        #grid-map h3 { background-color: rgb(0, 255, 174); }
-        #value-map h3 { background-color: green; }
-        #policy-map h3 { background-color: rgb(110, 232, 80); }
-        #calc-btn { background-color: rgb(0, 128, 85); color: white; }
-        #go-btn { background-color: rgba(0, 55, 255, 0.608); color: white; }
-        #random-btn { background-color: rgba(60, 255, 0, 0.711); }
-        #reset-btn { background-color: red; color: white; }
-        /* 針對 Value Map 的格子添加漸變背景 */
-        #values {
-            background: linear-gradient(45deg, #0dff9e, #ff99cc); /* 薄荷綠到粉色的漸變 */
-            color: #333; /* 深色文字，確保可讀 */
-            font-weight: bold; /* 讓數字更清晰 */
+        .buttons button:hover {
+            transform: scale(1.1); /* 懸停時放大 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* 懸停時陰影增強 */
+        }
+        #grid-map h3 { background-color: #31ff68; }
+        #value-map h3 { background-color: #32cd32; }
+        #policy-map h3 { background-color: #00e2b5; }
+        #calc-btn { background: linear-gradient(145deg, #32cd32, #228b22); }
+        #go-btn { background: linear-gradient(145deg, #1e90ff, #104e8b); }
+        #random-btn { background: linear-gradient(145deg, #ffd700, #daa520); }
+        #reset-btn { background: linear-gradient(145deg, #ff4040, #cd2626); }
+        #values{
+            background: linear-gradient(45deg, #4ff4b2, #ff99cc);
+            color: #333;
+            font-weight: bold;
+        }
+        #policies{
+            font-size: 20px;
+            color: #ef0303;
+            font-weight: bold;
+        }
+        #gif-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 1000;
+        }
+        #gif-container img {
+            width: 300px;
+            height: auto;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        /* 閃爍動畫 */
+        @keyframes flash {
+            0% { background: rgba(255, 255, 255, 0.8); }
+            50% { background: rgba(255, 255, 255, 0.2); }
+            100% { background: rgba(255, 255, 255, 0.1); }
+        }
+        .flash {
+            animation: flash 0.5s ease-in-out;
+        }
+        /* 輸入框樣式 */
+        #grid-size {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1em;
+        }
+        #grid-size:focus {
+            outline: none;
+            border-color: #002fff;
+            box-shadow: 0 0 5px #1e90ff;
+        }
+        #gif-container img {
+            width: 300px; /* 調整 GIF 大小 */
+            height: auto;
+            border: 2px solid #ff0000;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -88,7 +169,7 @@
         <button class="start">Start</button>
         <button class="end">End</button>
         <button class="obstacle">Obstacle</button>
-        <button class="empty">Empty</button>
+        <button class="Amazing">Amazing</button>
         <button class="path">Path</button>
     </div>
 
@@ -99,15 +180,26 @@
         <button id="reset-btn" onclick="resetGrid()">RESET</button>
     </div>
 
-    <p>Hi there!, click on cells to set start, end, and obstacles.</p>
+    <!-- 新增 GIF 顯示區域 -->
+    <div id="gif-container">
+        <img src="https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/professor.gif?raw=true" alt="Amazing">
+    </div>
+
+    <p>Hi, there is Enid! Click on cells to set the start, end, and other buttons you want.</p>
 
     <script>
         let gridSize = 5;
         let gridData = [];
-        let currentMode = 'start'; // 當前模式：start, end, obstacle, empty, path
+        let currentMode = 'start';
         let path = [];
 
-        // 初始化網格
+        const actionToArrow = {
+            'up': '↑',
+            'right': '→',
+            'down': '↓',
+            'left': '←'
+        };
+
         function generateGrid() {
             gridSize = parseInt(document.getElementById('grid-size').value);
             if (gridSize < 3 || gridSize > 9) {
@@ -115,10 +207,8 @@
                 return;
             }
 
-            // 初始化 gridData
             gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
 
-            // 渲染 Grid Map
             const grid = document.getElementById('grid');
             grid.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
             grid.innerHTML = '';
@@ -133,7 +223,6 @@
                 }
             }
 
-            // 渲染 Value Map
             const values = document.getElementById('values');
             values.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
             values.innerHTML = '';
@@ -145,7 +234,6 @@
                 }
             }
 
-            // 渲染 Policy Map
             const policies = document.getElementById('policies');
             policies.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
             policies.innerHTML = '';
@@ -156,21 +244,60 @@
                     policies.appendChild(cell);
                 }
             }
-        }
 
-        // 設定格子狀態
+            // 觸發閃爍效果
+            document.querySelectorAll('.grid-container').forEach(container => {
+                container.classList.add('flash');
+            });
+        }
+        // ------------------ 下面這裡是有修改的區域 ------------------
         function setCell(row, col) {
+            // 第 1 段：若當前要設定為 start，檢查是否已存在 start
+            if (currentMode === 'start') {
+                let hasStart = false;
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        if (gridData[r][c] === 'start') {
+                            hasStart = true;
+                            break;
+                        }
+                    }
+                    if (hasStart) break;
+                }
+                if (hasStart) {
+                    alert('Only one start-point can be set!');
+                    return;
+                }
+            }
+
+            // 第 2 段：若當前要設定為 end，檢查是否已存在 end
+            if (currentMode === 'end') {
+                let hasEnd = false;
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        if (gridData[r][c] === 'end') {
+                            hasEnd = true;
+                            break;
+                        }
+                    }
+                    if (hasEnd) break;
+                }
+                if (hasEnd) {
+                    alert('Only one end-point can be set!');
+                    return;
+                }
+            }
+
+            // 如沒重複，就正式設定此格子
             gridData[row][col] = currentMode;
             updateGridDisplay();
         }
-
-        // 更新 Grid Map 顯示
         function updateGridDisplay() {
             const cells = document.querySelectorAll('#grid .cell');
             cells.forEach(cell => {
                 const row = parseInt(cell.dataset.row);
                 const col = parseInt(cell.dataset.col);
-                cell.className = 'cell'; // 重置樣式
+                cell.className = 'cell';
                 if (gridData[row][col] === 'start') cell.classList.add('start');
                 else if (gridData[row][col] === 'end') cell.classList.add('end');
                 else if (gridData[row][col] === 'obstacle') cell.classList.add('obstacle');
@@ -178,14 +305,23 @@
             });
         }
 
-        // 按鈕切換模式
         document.querySelectorAll('.buttons button:not(#calc-btn):not(#go-btn):not(#random-btn):not(#reset-btn)').forEach(button => {
             button.onclick = () => {
                 currentMode = button.className;
+                if (currentMode === 'Amazing') {
+                    showGif();
+                }
             };
         });
 
-        // 計算價值迭代
+        function showGif() {
+            const gifContainer = document.getElementById('gif-container');
+            gifContainer.style.display = 'block';
+            setTimeout(() => {
+                gifContainer.style.display = 'none';
+            }, 6000);
+        }
+
         function calculate() {
             fetch('/calculate', {
                 method: 'POST',
@@ -204,9 +340,7 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // 顯示結果
         function displayResults(valueMap, policyMap, path) {
-            // 更新 Value Map
             const valueCells = document.querySelectorAll('#values .cell');
             valueCells.forEach((cell, index) => {
                 const row = Math.floor(index / gridSize);
@@ -214,15 +348,18 @@
                 cell.textContent = valueMap[row][col].toFixed(2);
             });
 
-            // 更新 Policy Map
             const policyCells = document.querySelectorAll('#policies .cell');
             policyCells.forEach((cell, index) => {
                 const row = Math.floor(index / gridSize);
                 const col = index % gridSize;
-                cell.textContent = policyMap[row][col].join(', ');
+                const actions = policyMap[row][col];
+                if (actions.length > 0) {
+                    cell.textContent = actions.map(action => actionToArrow[action]).join(' ');
+                } else {
+                    cell.textContent = '';
+                }
             });
 
-            // 更新 Grid Map 上的路徑
             gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
             path.forEach(([row, col], idx) => {
                 if (idx === 0) gridData[row][col] = 'start';
@@ -232,17 +369,14 @@
             updateGridDisplay();
         }
 
-        // GO 按鈕（可選：逐步顯示路徑）
         function go() {
             if (path.length === 0) {
                 alert('Please calculate the path first!');
                 return;
             }
-            // 這裡可以實現逐步顯示路徑的動畫效果
             updateGridDisplay();
         }
 
-        // 隨機生成網格
         function randomGrid() {
             gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
             const startPos = [Math.floor(Math.random() * gridSize), Math.floor(Math.random() * gridSize)];
@@ -262,7 +396,6 @@
             updateGridDisplay();
         }
 
-        // 重置網格
         function resetGrid() {
             gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
             path = [];
@@ -273,7 +406,6 @@
             policyCells.forEach(cell => cell.textContent = '');
         }
 
-        // 初始化
         generateGrid();
     </script>
 </body>
