@@ -1,5 +1,4 @@
 # NCHU_DNN_HW1
-Gridworld Environment and Value Evaluation
 # Gridworld Environment and Value Evaluation
 
 [![專案封面](https://example.com/cover.png)](https://example.com)
