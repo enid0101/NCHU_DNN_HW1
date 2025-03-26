@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gridworld Environment and Value Iteration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .grid-container {
+            border: 1px solid #ccc;
+        }
+        .grid-container h3 {
+            margin: 0;
+            padding: 10px;
+            color: white;
+        }
+        .grid {
+            display: grid;
+            border: 1px solid #000;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .start { background-color: green; }
+        .end { background-color: red; }
+        .obstacle { background-color: gray; }
+        .path { background-color: yellow; }
+        .buttons {
+            margin: 10px 0;
+        }
+        .buttons button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        #grid-map h3 { background-color: rgb(0, 255, 174); }
+        #value-map h3 { background-color: green; }
+        #policy-map h3 { background-color: rgb(110, 232, 80); }
+        #calc-btn { background-color: rgb(0, 128, 85); color: white; }
+        #go-btn { background-color: rgba(0, 55, 255, 0.608); color: white; }
+        #random-btn { background-color: rgba(60, 255, 0, 0.711); }
+        #reset-btn { background-color: red; color: white; }
+        /* 針對 Value Map 的格子添加漸變背景 */
+        #values {
+            background: linear-gradient(45deg, #0dff9e, #ff99cc); /* 薄荷綠到粉色的漸變 */
+            color: #333; /* 深色文字，確保可讀 */
+            font-weight: bold; /* 讓數字更清晰 */
+        }
+    </style>
+</head>
+<body>
+    <h1>Gridworld Environment and Value Iteration</h1>
+    <div>
+        Grid Size (3-9): <input type="number" id="grid-size" value="5" min="3" max="9">
+        <button onclick="generateGrid()">Generate</button>
+    </div>
+
+    <div class="container">
+        <div id="grid-map" class="grid-container">
+            <h3>Grid Map</h3>
+            <div id="grid" class="grid"></div>
+        </div>
+        <div id="value-map" class="grid-container">
+            <h3>Value Map</h3>
+            <div id="values" class="grid"></div>
+        </div>
+        <div id="policy-map" class="grid-container">
+            <h3>Policy Map</h3>
+            <div id="policies" class="grid"></div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button class="start">Start</button>
+        <button class="end">End</button>
+        <button class="obstacle">Obstacle</button>
+        <button class="empty">Empty</button>
+        <button class="path">Path</button>
+    </div>
+
+    <div class="buttons">
+        <button id="calc-btn" onclick="calculate()">CALC</button>
+        <button id="go-btn" onclick="go()">GO</button>
+        <button id="random-btn" onclick="randomGrid()">RANDOM</button>
+        <button id="reset-btn" onclick="resetGrid()">RESET</button>
+    </div>
+
+    <p>Hi there!, click on cells to set start, end, and obstacles.</p>
+
+    <script>
+        let gridSize = 5;
+        let gridData = [];
+        let currentMode = 'start'; // 當前模式：start, end, obstacle, empty, path
+        let path = [];
+
+        // 初始化網格
+        function generateGrid() {
+            gridSize = parseInt(document.getElementById('grid-size').value);
+            if (gridSize < 3 || gridSize > 9) {
+                alert('Grid size must be between 3 and 9');
+                return;
+            }
+
+            // 初始化 gridData
+            gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
+
+            // 渲染 Grid Map
+            const grid = document.getElementById('grid');
+            grid.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
+            grid.innerHTML = '';
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.onclick = () => setCell(i, j);
+                    grid.appendChild(cell);
+                }
+            }
+
+            // 渲染 Value Map
+            const values = document.getElementById('values');
+            values.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
+            values.innerHTML = '';
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    values.appendChild(cell);
+                }
+            }
+
+            // 渲染 Policy Map
+            const policies = document.getElementById('policies');
+            policies.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
+            policies.innerHTML = '';
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    policies.appendChild(cell);
+                }
+            }
+        }
+
+        // 設定格子狀態
+        function setCell(row, col) {
+            gridData[row][col] = currentMode;
+            updateGridDisplay();
+        }
+
+        // 更新 Grid Map 顯示
+        function updateGridDisplay() {
+            const cells = document.querySelectorAll('#grid .cell');
+            cells.forEach(cell => {
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                cell.className = 'cell'; // 重置樣式
+                if (gridData[row][col] === 'start') cell.classList.add('start');
+                else if (gridData[row][col] === 'end') cell.classList.add('end');
+                else if (gridData[row][col] === 'obstacle') cell.classList.add('obstacle');
+                else if (gridData[row][col] === 'path') cell.classList.add('path');
+            });
+        }
+
+        // 按鈕切換模式
+        document.querySelectorAll('.buttons button:not(#calc-btn):not(#go-btn):not(#random-btn):not(#reset-btn)').forEach(button => {
+            button.onclick = () => {
+                currentMode = button.className;
+            };
+        });
+
+        // 計算價值迭代
+        function calculate() {
+            fetch('/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gridSize: gridSize, gridData: gridData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                path = data.path;
+                displayResults(data.valueMap, data.policyMap, data.path);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // 顯示結果
+        function displayResults(valueMap, policyMap, path) {
+            // 更新 Value Map
+            const valueCells = document.querySelectorAll('#values .cell');
+            valueCells.forEach((cell, index) => {
+                const row = Math.floor(index / gridSize);
+                const col = index % gridSize;
+                cell.textContent = valueMap[row][col].toFixed(2);
+            });
+
+            // 更新 Policy Map
+            const policyCells = document.querySelectorAll('#policies .cell');
+            policyCells.forEach((cell, index) => {
+                const row = Math.floor(index / gridSize);
+                const col = index % gridSize;
+                cell.textContent = policyMap[row][col].join(', ');
+            });
+
+            // 更新 Grid Map 上的路徑
+            gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
+            path.forEach(([row, col], idx) => {
+                if (idx === 0) gridData[row][col] = 'start';
+                else if (idx === path.length - 1) gridData[row][col] = 'end';
+                else gridData[row][col] = 'path';
+            });
+            updateGridDisplay();
+        }
+
+        // GO 按鈕（可選：逐步顯示路徑）
+        function go() {
+            if (path.length === 0) {
+                alert('Please calculate the path first!');
+                return;
+            }
+            // 這裡可以實現逐步顯示路徑的動畫效果
+            updateGridDisplay();
+        }
+
+        // 隨機生成網格
+        function randomGrid() {
+            gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
+            const startPos = [Math.floor(Math.random() * gridSize), Math.floor(Math.random() * gridSize)];
+            let endPos;
+            do {
+                endPos = [Math.floor(Math.random() * gridSize), Math.floor(Math.random() * gridSize)];
+            } while (endPos[0] === startPos[0] && endPos[1] === startPos[1]);
+            gridData[startPos[0]][startPos[1]] = 'start';
+            gridData[endPos[0]][endPos[1]] = 'end';
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (gridData[i][j] !== 'start' && gridData[i][j] !== 'end' && Math.random() < 0.2) {
+                        gridData[i][j] = 'obstacle';
+                    }
+                }
+            }
+            updateGridDisplay();
+        }
+
+        // 重置網格
+        function resetGrid() {
+            gridData = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
+            path = [];
+            updateGridDisplay();
+            const valueCells = document.querySelectorAll('#values .cell');
+            valueCells.forEach(cell => cell.textContent = '');
+            const policyCells = document.querySelectorAll('#policies .cell');
+            policyCells.forEach(cell => cell.textContent = '');
+        }
+
+        // 初始化
+        generateGrid();
+    </script>
+</body>
+</html>
