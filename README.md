@@ -3,16 +3,43 @@
 
 [![專案封面](https://example.com/cover.png)](https://example.com)
 
-這裡寫上專案簡介、用途或特色，兩三句話帶過。
+# Flask Gridworld Reinforcement Learning Environment
 
-## 功能特色
-- 功能 A
-- 功能 B
-- 功能 C
+**Overview**  
+This Flask application implements a grid-based reinforcement learning environment that demonstrates value iteration for finding optimal paths.
 
-## 安裝與使用
-1. Clone 此專案
-2. 安裝依賴套件: `npm install`
-3. 執行程式: `npm start`
-4. 在瀏覽器開啟 `http://localhost:3000`
+## Features
 
+### Grid Generation
+- Users can create grids of size 3×3 to 9×9.
+
+### Map Editing
+- **Start position** (green) – only 1 allowed.  
+- **End position** (red) – only 1 allowed.  
+- **Obstacles** (gray) – up to N-2 allowed.
+
+### Reward Settings
+- End position: `+20`  
+- Obstacles: `-5`  
+- Other cells: `-0.1`
+
+### Optimal Path Calculation
+- Uses **Value Iteration** algorithm.  
+- Displays **Value Function Map**.  
+- Shows **Optimal Policy** with directional arrows.
+
+### Visualization
+- Animated robot movement along the optimal path.  
+- Color-coded value map.  
+- Directional arrows for policy.
+
+---
+
+## Environment Setup
+- **Python**: 3.12(64-bit)
+
+### Step 1. Clone This Folder with Sparse-Checkout
+```bash
+git clone --depth 1 --no-checkout [https://github.com/devilhyt/nchu-stuff.git](https://github.com/enid0101/NCHU_DNN_HW1)
+
+### Step 2. Check the Python Version
