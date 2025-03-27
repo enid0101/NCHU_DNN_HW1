@@ -1,7 +1,7 @@
 # NCHU_DNN_HW1
 # Gridworld Environment and Value Evaluation
 
-[![專案封面]([https://example.com/cover.png](https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/DRL.gif?raw=true))](https://example.com)
+([https://example.com/cover.png](https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/DRL.gif?raw=true))](https://example.com)
 
 # Flask Gridworld Reinforcement Learning Environment
 
@@ -45,7 +45,8 @@ git clone --depth 1 --no-checkout [https://github.com/devilhyt/nchu-stuff.git](h
 
 ### Step 3. Python Version
 - Install All Dependencies
-- pip install -r requirements.txt
+- flask==3.1.0
+- numpy==2.2.3
 
 ### Step 4. Run Flask Server
 ```bash
