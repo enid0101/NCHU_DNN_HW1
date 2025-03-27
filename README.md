@@ -1,7 +1,7 @@
 # NCHU_DNN_HW1
 # Gridworld Environment and Value Evaluation
 
-[![專案封面](https://example.com/cover.png)](https://example.com)
+[![專案封面]([https://example.com/cover.png](https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/DRL.gif?raw=true))](https://example.com)
 
 # Flask Gridworld Reinforcement Learning Environment
 
@@ -36,10 +36,36 @@ This Flask application implements a grid-based reinforcement learning environmen
 ---
 
 ## Environment Setup
-- **Python**: 3.12(64-bit)
-
 ### Step 1. Clone This Folder with Sparse-Checkout
 ```bash
 git clone --depth 1 --no-checkout [https://github.com/devilhyt/nchu-stuff.git](https://github.com/enid0101/NCHU_DNN_HW1)
+```
+### Step 2. Python Version
+- **Python**: 3.12(64-bit)
 
-### Step 2. Check the Python Version
+### Step 3. Python Version
+- Install All Dependencies
+- pip install -r requirements.txt
+
+### Step 4. Run Flask Server
+```bash
+flask run
+```
+This server is running on http://127.0.0.1:5000
+
+## How to Use
+Generate the Grid
+- Select a size between 3 and 9, then click Generate.
+- Mark the Start, End, and Obstacles
+- First cell clicked: Start position
+- Second cell clicked: End position
+- Next N–2 clicks: Obstacles
+- Calculate and Visualize
+-- Click CALC to compute the optimal policy.
+
+## Random and Reset
+- Click Random to create a random grid and compute its path.
+- Click RESET to clear the board and start fresh.
+
+# Appendix
+If you have anything want to know, feel free to let me know, thx.
