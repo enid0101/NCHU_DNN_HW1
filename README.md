@@ -1,8 +1,8 @@
 # NCHU_DNN_HW1
 # Gridworld Environment and Value Evaluation
 
-<img src="https://github.com/enid0101/0/blob/main/gif/DRL/DRL.gif?raw=true" width=550" height="500" alt="Yu-chun Lin">
-([https://example.com/cover.png](https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/DRL.gif?raw=true))](https://example.com)
+<img src="[https://github.com/enid0101/0/blob/main/gif/DRL/DRL.gif?raw=true](https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/DRL.gif?raw=true)" width=550" height="500" alt="Yu-chun Lin">
+([https://example.com/cover.png](https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/DRL.gif?raw=true))]([https://example.com](https://github.com/enid0101/NCHU_DNN_HW1/blob/main/image/DRL.gif?raw=true))
 
 # Flask Gridworld Reinforcement Learning Environment
 
